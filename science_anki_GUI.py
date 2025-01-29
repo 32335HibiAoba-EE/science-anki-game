@@ -20,9 +20,9 @@ for i in range(len(mylist)):
         cmpd = Cmpd(tkinter.PhotoImage(file=mylist[i][0]), mylist[i][1])
         aromatic.append(cmpd)
 
-prog = 0 #問題進度を表す
+prog = 1 #問題進度を表す
 score = 0 #得点をあらわす
-mode = 2 #0->出題, 1->解答, 2->得点
+mode = 2 #0->出題, 1->解答,得点, 2->スタート画面
 total = len(aromatic) #問題数
 img = tkinter.PhotoImage(file="start.png")
 label1 = tkinter.Label(root,text="フラッシュ化学暗記ゲーム　芳香族化合物ver.")
@@ -37,26 +37,38 @@ def change(x, y): #x: 0->wrong, 1->next, 2->correct #y: progress
     global mode, score, prog
     
     if x==0 and mode==1:#wrong
-        mode = 2
-        score = score+0
-        label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))
-    elif x == 1 : #next
-        if mode==0:
+        if prog>=total:
+            score = score+0
+            label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))
+            label4.configure(text="解答終了　合計{:2}問正解です".format(score))
+        else:
+            mode = 0
+            score = score+0
+            prog = prog+1
+            label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))
+            label3.configure(image=aromatic[y].image)
+            label4.configure(text="What is this compound's name?")
+    elif x == 1: #next
+        if mode==2 and y==1:
+            mode = 0
+            label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))
+            label3.configure(image=aromatic[y-1].image)
+            label4.configure(text="What is this compound's name?")
+        elif mode==0:
             mode = 1
             label4.configure(text="Answer: {:20}".format(aromatic[y-1].name))
-        elif mode==2:
-            if prog>=total:
-                label4.configure(text="解答終了　合計{:2}問正解です".format(score))
-            else:
-                mode = 0
-                prog = prog+1
-                label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))
-                label3.configure(image=aromatic[y].image)
-                label4.configure(text="What is this compound's name?")
-    elif x==2 and mode==1: #correct
-        mode = 2
-        score = score+1
-        label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))    
+    elif x==2 and mode==1: #correct  
+        if prog>=total:
+            score = score+1
+            label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total))
+            label4.configure(text="解答終了　合計{:2}問正解です".format(score))
+        else:
+            mode = 0
+            score = score+1
+            prog = prog+1
+            label2.configure(text="SCORE:{:3}  PROGRESS:{:3}/{:2}".format(score,prog,total)) 
+            label3.configure(image=aromatic[y].image)
+            label4.configure(text="What is this compound's name?") 
 
 button1 = tkinter.Button(root,text="　wrong...　",command=lambda:change(0,prog))
 button2 = tkinter.Button(root,text="　 >>next　 ",command=lambda:change(1,prog))
